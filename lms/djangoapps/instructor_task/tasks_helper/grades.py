@@ -600,24 +600,38 @@ class ProblemResponses(object):
         problem_key = UsageKey.from_string(problem_location).map_into_course(course_id)
         user = get_user_model().objects.get(pk=user_id)
         course_blocks = get_course_blocks(user, problem_key)
+        store = modulestore()
 
         student_data = []
         max_count = settings.FEATURES.get('MAX_PROBLEM_RESPONSES_COUNT')
-        for title, path, block_key in cls._build_problem_list(course_blocks, problem_key):
-            # Chapter and sequential blocks are filtered out since they include state
-            # which isn't useful for this report.
-            if block_key.block_type in ('sequential', 'chapter'):
-                continue
-            responses = list_problem_responses(course_id, block_key, max_count)
-            student_data += responses
-            for response in responses:
-                response['title'] = title
-                response['location'] = ' > '.join(path)
-                response['block_key'] = str(block_key)
-            if max_count is not None:
-                max_count -= len(responses)
-                if max_count <= 0:
-                    break
+        with store.bulk_operations(problem_key.course_key):
+            for title, path, block_key in cls._build_problem_list(store, course_blocks, problem_key):
+                # Chapter and sequential blocks are filtered out since they include state
+                # which isn't useful for this report.
+                if block_key.block_type in ('sequential', 'chapter'):
+                    continue
+
+                block = store.get_item(block_key)
+                generate_report_data = None
+
+                if hasattr(block, 'generate_report_data'):
+                    generate_report_data = block.generate_report_data
+                elif hasattr(block.module_class, 'generate_report_data'):
+                    generate_report_data = block.module_class.generate_report_data
+                if generate_report_data is None:
+                    responses = list_problem_responses(course_id, block_key, max_count)
+                else:
+                    responses = generate_report_data(limit_responses=max_count)
+
+                student_data += responses
+                for response in responses:
+                    response['title'] = title
+                    response['location'] = ' > '.join(path)
+                    response['block_key'] = str(block_key)
+                if max_count is not None:
+                    max_count -= len(responses)
+                    if max_count <= 0:
+                        break
 
         return student_data
 
