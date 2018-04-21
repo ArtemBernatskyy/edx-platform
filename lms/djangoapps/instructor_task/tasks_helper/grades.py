@@ -605,7 +605,7 @@ class ProblemResponses(object):
         student_data = []
         max_count = settings.FEATURES.get('MAX_PROBLEM_RESPONSES_COUNT')
         with store.bulk_operations(problem_key.course_key):
-            for title, path, block_key in cls._build_problem_list(store, course_blocks, problem_key):
+            for title, path, block_key in cls._build_problem_list(course_blocks, problem_key):
                 # Chapter and sequential blocks are filtered out since they include state
                 # which isn't useful for this report.
                 if block_key.block_type in ('sequential', 'chapter'):
@@ -621,7 +621,8 @@ class ProblemResponses(object):
                 if generate_report_data is None:
                     responses = list_problem_responses(course_id, block_key, max_count)
                 else:
-                    responses = generate_report_data(limit_responses=max_count)
+                    # TODO: potential API
+                    responses = generate_report_data(block, limit_responses=max_count)
 
                 student_data += responses
                 for response in responses:
