@@ -303,6 +303,56 @@ class CapaDescriptor(CapaFields, RawDescriptor):
         )
         return lcp.get_max_score()
 
+    def generate_report_data(self, user_state_iterator):
+        """
+        Generate human-readable data for use in an LMS's Student Response Report
+        """
+        print("\n\ngenerate_report_data for capa problem with ID {}".format(self.location))
+        from capa.capa_problem import LoncapaProblem, LoncapaSystem
+        capa_system = LoncapaSystem(
+            ajax_url=None,
+            anonymous_student_id=None,
+            cache=None,
+            can_execute_unsafe_code=None,
+            get_python_lib_zip=None,
+            DEBUG=None,
+            filestore=self.runtime.resources_fs,
+            i18n=self.runtime.service(self, "i18n"),
+            node_path=None,
+            render_template=None,
+            seed=1,
+            STATIC_URL=None,
+            xqueue=None,
+            matlab_api_key=None,
+        )
+        for user_state in user_state_iterator:
+            #capa_system.anonymous_student_id = # TODO re-set the anonymous ID to this student's anonymous ID somehow?
+            lcp = LoncapaProblem(
+                problem_text=self.data,
+                id=self.location.html_id(),
+                capa_system=capa_system,
+                capa_module=self,
+                state={
+                    'done': user_state.state.get('done'),
+                    'correct_map': user_state.state.get('correct_map'),
+                    'student_answers': user_state.state.get('student_answers'),
+                    'has_saved_answers': user_state.state.get('has_saved_answers'),
+                    'input_state': user_state.state.get('input_state'),
+                    'seed': user_state.state.get('seed'),
+                },
+                seed=user_state.state.get('seed'),
+                extract_tree=False,
+            )
+            for question_id, answers in lcp.get_question_answers().items():
+                problem_data = lcp.problem_data[question_id]
+                print("On question {question_id} ({description}) user {username} answered {answer}".format(
+                    question_id=question_id,
+                    description=problem_data.get('label', problem_data.get('descriptions').values()[0].striptags()),
+                    username=user_state.username,
+                    answer=answers[0],
+                ))
+
+
     # Proxy to CapaModule for access to any of its attributes
     answer_available = module_attr('answer_available')
     submit_button_name = module_attr('submit_button_name')
