@@ -3,13 +3,12 @@
 from django.conf import settings
 from django.conf.urls import url
 
-from .views import ProviderView, UserMappingView, UserView
+from .views import UserMappingView, UserView
 
 
 PROVIDER_PATTERN = r'(?P<provider_id>[\w.+-]+)(?:\:(?P<idp_slug>[\w.+-]+))?'
 
 urlpatterns = [
-    url(r'^v0/users/(?P<identifier>[^/]+)/providers/$', ProviderView.as_view(), name='third_party_auth_providers_api'),
     url(
         r'^v0/users/{username_pattern}$'.format(username_pattern=settings.USERNAME_PATTERN),
         UserView.as_view(),
