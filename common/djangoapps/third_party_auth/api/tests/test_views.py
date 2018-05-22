@@ -1,12 +1,10 @@
 """
 Tests for the Third Party Auth REST API
 """
-import json
 import unittest
 
 import ddt
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.http import QueryDict
 from django.test.utils import override_settings
 from django.urls import reverse
