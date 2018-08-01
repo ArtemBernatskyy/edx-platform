@@ -2348,7 +2348,9 @@ class TestIndexView(ModuleStoreTestCase):
         with self.store.bulk_operations(course.id):
             chapter = ItemFactory(parent=course, category='chapter')
             section = ItemFactory(parent=chapter, category='sequential')
-            ItemFactory.create(parent=section, category='vertical', display_name="Vertical")
+            vertical = ItemFactory.create(parent=section, category='vertical', display_name="Vertical")
+            ItemFactory.create(parent=vertical, category='html', display_name='HTML block')
+            ItemFactory.create(parent=vertical, category='video', display_name='Video')
 
         url = reverse(
             'courseware_section',
@@ -2362,6 +2364,13 @@ class TestIndexView(ModuleStoreTestCase):
         with override_waffle_flag(COURSE_ENABLE_ANONYMOUS_ACCESS_FLAG, active=waffle_override):
             response = self.client.get(url, follow=False)
             assert response.status_code == expected_status
+            if expected_status == 200:  # Public access is available
+                self.assertIn('data-save-position="false"', response.content)
+                self.assertIn('data-show-completion="false"', response.content)
+                self.assertIn('xblock-anonymous_view-sequential', response.content)
+                self.assertIn('xblock-anonymous_view-vertical', response.content)
+                self.assertIn('xblock-anonymous_view-html', response.content)
+                self.assertIn('xblock-anonymous_view-video', response.content)
 
         user = UserFactory()
         CourseEnrollmentFactory(user=user, course_id=course.id)

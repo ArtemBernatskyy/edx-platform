@@ -42,7 +42,7 @@ from shoppingcart.models import CourseRegistrationCode
 from student.views import is_course_blocked
 from util.views import ensure_valid_course_key
 from xmodule.modulestore.django import modulestore
-from xmodule.x_module import STUDENT_VIEW
+from xmodule.x_module import ANONYMOUS_VIEW, STUDENT_VIEW
 from .views import CourseTabView
 from ..access import has_access
 from ..access_utils import check_course_open_for_learner
@@ -118,7 +118,11 @@ class CoursewareIndex(View):
                     depth=CONTENT_DEPTH,
                     check_if_enrolled=not self.enable_anonymous_courseware_access,
                 )
-                if not (request.user.is_authenticated or self.course.course_visibility == 'public'):
+                if request.user.is_authenticated:
+                    self.view = STUDENT_VIEW
+                elif self.course.course_visibility == 'public':
+                    self.view = ANONYMOUS_VIEW
+                else:
                     return redirect_to_login(request.get_full_path())
 
                 self.is_staff = has_access(request.user, 'staff', self.course)
@@ -438,7 +442,10 @@ class CoursewareIndex(View):
                 table_of_contents['previous_of_active_section'],
                 table_of_contents['next_of_active_section'],
             )
-            courseware_context['fragment'] = self.section.render(STUDENT_VIEW, section_context)
+
+            # block content
+            courseware_context['fragment'] = self.section.render(self.view, section_context)
+
             if self.section.position and self.section.has_children:
                 self._add_sequence_title_to_context(courseware_context)
 
