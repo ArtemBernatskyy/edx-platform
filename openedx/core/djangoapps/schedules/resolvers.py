@@ -13,6 +13,8 @@ from edx_ace.recipient import Recipient
 from edx_django_utils.monitoring import function_trace, set_custom_metric
 
 from courseware.date_summary import verified_upgrade_deadline_link, verified_upgrade_link_is_valid
+from lms.djangoapps.notification_prefs.views import UsernameCipher
+from openedx.core.djangoapps.monitoring_utils import function_trace, set_custom_metric
 from openedx.core.djangoapps.schedules.content_highlights import get_week_highlights
 from openedx.core.djangoapps.schedules.exceptions import CourseUpdateDoesNotExist
 from openedx.core.djangoapps.schedules.models import Schedule, ScheduleExperience
@@ -367,6 +369,7 @@ class CourseUpdateResolver(BinnedSchedulesBaseResolver):
 
                     # This is used by the bulk email optout policy
                     'course_ids': [str(enrollment.course_id)],
+                    'username': UsernameCipher.encrypt(user.username),
                 })
                 template_context.update(_get_upsell_information_for_schedule(user, schedule))
 

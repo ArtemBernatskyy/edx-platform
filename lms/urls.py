@@ -20,6 +20,7 @@ from courseware.views.views import CourseTabView, EnrollStaffView, StaticCourseT
 from debug import views as debug_views
 from django_comment_common.models import ForumsConfig
 from django_openid_auth import views as django_openid_auth_views
+from lms.djangoapps.bulk_email import views as bulk_email_views
 from lms.djangoapps.certificates import views as certificates_views
 from lms.djangoapps.discussion import views as discussion_views
 from lms.djangoapps.instructor.views import coupons as instructor_coupons_views
@@ -742,6 +743,16 @@ if settings.FEATURES.get('ENABLE_DISCUSSION_SERVICE'):
             name='resubscribe_forum_update',
         ),
     ]
+
+urlpatterns += [
+    url(
+        r'^email/optout/(?P<token>[a-zA-Z0-9-_=]+)/{}/$'.format(
+            settings.COURSE_ID_PATTERN,
+        ),
+        bulk_email_views.opt_out_email_updates,
+        name='bulk_email_opt_out',
+    ),
+]
 
 urlpatterns += [
     url(
