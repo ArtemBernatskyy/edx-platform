@@ -16,7 +16,7 @@ from . import get_test_system
 from .helpers import StubUserService
 from .xml import XModuleXmlImportTest
 from .xml import factories as xml
-from ..x_module import STUDENT_VIEW, AUTHOR_VIEW, ANONYMOUS_VIEW
+from ..x_module import STUDENT_VIEW, AUTHOR_VIEW, PREVIEW_VIEW
 
 COMPLETION_DELAY = 9876
 
@@ -122,9 +122,9 @@ class VerticalBlockTestCase(BaseVerticalBlockTest):
     @ddt.data(
         {'context': None, 'view': STUDENT_VIEW},
         {'context': {}, 'view': STUDENT_VIEW},
-        {'context': {}, 'view': ANONYMOUS_VIEW},
+        {'context': {}, 'view': PREVIEW_VIEW},
     )
-    def test_render_student_anonymous_view(self, context, view):
+    def test_render_student_preview_view(self, context, view):
         """
         Test the rendering of the student and anonymous view.
         """
@@ -132,7 +132,7 @@ class VerticalBlockTestCase(BaseVerticalBlockTest):
         if view == STUDENT_VIEW:
             self.module_system._services['user'] = StubUserService()
             self.module_system._services['completion'] = StubCompletionService(enabled=True, completion_value=0.0)
-        elif view == ANONYMOUS_VIEW:
+        elif view == PREVIEW_VIEW:
             self.module_system._services['user'] = StubUserService(is_anonymous=True)
 
         html = self.module_system.render(

@@ -24,6 +24,8 @@ from opaque_keys.edx.keys import CourseKey
 from web_fragments.fragment import Fragment
 
 from edxmako.shortcuts import render_to_response, render_to_string
+
+from student.models import CourseEnrollment
 from lms.djangoapps.courseware.exceptions import CourseAccessRedirect
 from lms.djangoapps.experiments.utils import get_experiment_user_metadata_context
 from lms.djangoapps.gating.api import get_entrance_exam_score_ratio, get_entrance_exam_usage_key
@@ -42,7 +44,7 @@ from shoppingcart.models import CourseRegistrationCode
 from student.views import is_course_blocked
 from util.views import ensure_valid_course_key
 from xmodule.modulestore.django import modulestore
-from xmodule.x_module import ANONYMOUS_VIEW, STUDENT_VIEW
+from xmodule.x_module import PREVIEW_VIEW, STUDENT_VIEW
 from .views import CourseTabView
 from ..access import has_access
 from ..access_utils import check_course_open_for_learner
@@ -118,10 +120,11 @@ class CoursewareIndex(View):
                     depth=CONTENT_DEPTH,
                     check_if_enrolled=not self.enable_anonymous_courseware_access,
                 )
-                if request.user.is_authenticated:
+                is_enrolled = CourseEnrollment.is_enrolled(request.user, self.course_key)
+                if is_enrolled:
                     self.view = STUDENT_VIEW
                 elif self.course.course_visibility == 'public':
-                    self.view = ANONYMOUS_VIEW
+                    self.view = PREVIEW_VIEW
                 else:
                     return redirect_to_login(request.get_full_path())
 

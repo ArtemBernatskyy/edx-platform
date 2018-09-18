@@ -2367,10 +2367,10 @@ class TestIndexView(ModuleStoreTestCase):
             if expected_status == 200:  # Public access is available
                 self.assertIn('data-save-position="false"', response.content)
                 self.assertIn('data-show-completion="false"', response.content)
-                self.assertIn('xblock-anonymous_view-sequential', response.content)
-                self.assertIn('xblock-anonymous_view-vertical', response.content)
-                self.assertIn('xblock-anonymous_view-html', response.content)
-                self.assertIn('xblock-anonymous_view-video', response.content)
+                self.assertIn('xblock-preview_view-sequential', response.content)
+                self.assertIn('xblock-preview_view-vertical', response.content)
+                self.assertIn('xblock-preview_view-html', response.content)
+                self.assertIn('xblock-preview_view-video', response.content)
 
         user = UserFactory()
         CourseEnrollmentFactory(user=user, course_id=course.id)

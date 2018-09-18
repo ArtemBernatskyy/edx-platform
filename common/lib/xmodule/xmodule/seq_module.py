@@ -22,7 +22,7 @@ from .exceptions import NotFoundError
 from .fields import Date
 from .mako_module import MakoModuleDescriptor
 from .progress import Progress
-from .x_module import STUDENT_VIEW, ANONYMOUS_VIEW, XModule
+from .x_module import STUDENT_VIEW, PREVIEW_VIEW, XModule
 from .xml_module import XmlDescriptor
 
 log = logging.getLogger(__name__)
@@ -249,11 +249,11 @@ class SequenceModule(SequenceFields, ProctoringFields, XModule):
                 return Fragment(special_html)
         return self._student_view(context, banner_text)
 
-    def anonymous_view(self, context):
+    def preview_view(self, context):
         """
         Renders the anonymous view of the block in the LMS.
         """
-        return self._student_view(context or {}, None, ANONYMOUS_VIEW)
+        return self._student_view(context or {}, None, PREVIEW_VIEW)
 
     def _special_exam_student_view(self):
         """
@@ -337,8 +337,8 @@ class SequenceModule(SequenceFields, ProctoringFields, XModule):
             'next_url': context.get('next_url'),
             'prev_url': context.get('prev_url'),
             'banner_text': banner_text,
-            'save_position': view != ANONYMOUS_VIEW,
-            'show_completion': view != ANONYMOUS_VIEW,
+            'save_position': view != PREVIEW_VIEW,
+            'show_completion': view != PREVIEW_VIEW,
             'gated_content': self._get_gated_content_info(prereq_met, prereq_meta_info)
         }
         fragment.add_content(self.system.render_template("seq_module.html", params))

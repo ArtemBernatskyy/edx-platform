@@ -140,7 +140,7 @@ html.video-fullscreen {
       margin: 0 auto;
 
       &.xblock-student_view-vertical,
-      &.xblock-anonymous_view-vertical {
+      &.xblock-preview_view-vertical {
         max-width: $text-width-readability-max;
       }
     }
@@ -583,7 +583,7 @@ html.video-fullscreen {
       }
 
       .vert > .xblock-student_view.is-hidden,
-      .vert > .xblock-anonymous_view.is-hidden {
+      .vert > .xblock-preview_view.is-hidden {
         display: none;
         border-bottom: 0;
         margin-bottom: 0;
@@ -597,7 +597,7 @@ html.video-fullscreen {
     }
 
     section.xblock-student_view-wrapper div.vert-mod > div,
-    section.xblock-anonymous_view-wrapper div.vert-mod > div {
+    section.xblock-preview_view-wrapper div.vert-mod > div {
       border-bottom: none;
     }
 

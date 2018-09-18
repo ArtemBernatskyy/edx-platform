@@ -17,7 +17,7 @@ from xmodule.progress import Progress
 from xmodule.seq_module import SequenceFields
 from xmodule.studio_editable import StudioEditableBlock
 from xmodule.util.xmodule_django import add_webpack_to_fragment
-from xmodule.x_module import STUDENT_VIEW, ANONYMOUS_VIEW, XModuleFields
+from xmodule.x_module import STUDENT_VIEW, PREVIEW_VIEW, XModuleFields
 from xmodule.xml_module import XmlParserMixin
 
 import webpack_loader.utils
@@ -119,11 +119,11 @@ class VerticalBlock(SequenceFields, XModuleFields, StudioEditableBlock, XmlParse
         """
         return self._student_view(context, STUDENT_VIEW)
 
-    def anonymous_view(self, context):
+    def preview_view(self, context):
         """
         Renders the anonymous view of the block in the LMS.
         """
-        return self._student_view(context, ANONYMOUS_VIEW)
+        return self._student_view(context, PREVIEW_VIEW)
 
     def author_view(self, context):
         """

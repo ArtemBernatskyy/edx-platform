@@ -80,7 +80,7 @@ class HtmlBlock(object):
         return Fragment(self.get_html())
 
     @XBlock.supports("multi_device")
-    def anonymous_view(self, context):
+    def preview_view(self, context):
         """
         Returns a fragment that contains the html for the anonymous view
         """

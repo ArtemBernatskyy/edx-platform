@@ -13,7 +13,7 @@ from xmodule.seq_module import SequenceModule
 from xmodule.tests import get_test_system
 from xmodule.tests.helpers import StubUserService
 from xmodule.tests.xml import factories as xml, XModuleXmlImportTest
-from xmodule.x_module import ANONYMOUS_VIEW, STUDENT_VIEW
+from xmodule.x_module import PREVIEW_VIEW, STUDENT_VIEW
 
 TODAY = now()
 DUE_DATE = TODAY + timedelta(days=7)
@@ -128,7 +128,7 @@ class SequenceBlockTestCase(XModuleXmlImportTest):
     @ddt.unpack
     @ddt.data(
         {'view': STUDENT_VIEW},
-        {'view': ANONYMOUS_VIEW},
+        {'view': PREVIEW_VIEW},
     )
     def test_render_student_view(self, view):
         html = self._get_rendered_view(
@@ -146,7 +146,7 @@ class SequenceBlockTestCase(XModuleXmlImportTest):
     @ddt.unpack
     @ddt.data(
         {'view': STUDENT_VIEW},
-        {'view': ANONYMOUS_VIEW},
+        {'view': PREVIEW_VIEW},
     )
     def test_student_view_first_child(self, view):
         html = self._get_rendered_view(
@@ -157,7 +157,7 @@ class SequenceBlockTestCase(XModuleXmlImportTest):
     @ddt.unpack
     @ddt.data(
         {'view': STUDENT_VIEW},
-        {'view': ANONYMOUS_VIEW},
+        {'view': PREVIEW_VIEW},
     )
     def test_student_view_last_child(self, view):
         html = self._get_rendered_view(self.sequence_3_1, requested_child='last', view=view)

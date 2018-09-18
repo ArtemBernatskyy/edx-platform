@@ -59,7 +59,7 @@ STUDENT_VIEW = 'student_view'
 
 # This is the view that will be rendered to display the XBlock in the LMS for preview.
 # Implementations of this view should assume that a user and user data are not available.
-ANONYMOUS_VIEW = 'anonymous_view'
+PREVIEW_VIEW = 'preview_view'
 
 # An optional view of the XBlock similar to student_view, but with possible inline
 # editing capabilities. This view differs from studio_view in that it should be as similar to student_view
@@ -71,9 +71,9 @@ AUTHOR_VIEW = 'author_view'
 STUDIO_VIEW = 'studio_view'
 
 # Views that present a "preview" view of an xblock (as opposed to an editing view).
-PREVIEW_VIEWS = [STUDENT_VIEW, ANONYMOUS_VIEW, AUTHOR_VIEW]
+PREVIEW_VIEWS = [STUDENT_VIEW, PREVIEW_VIEW, AUTHOR_VIEW]
 
-DEFAULT_ANONYMOUS_MESSAGE = u'Please enroll to view this content.'
+DEFAULT_PREVIEW_MESSAGE = u'Please enroll to view this content.'
 
 # Make '_' a no-op so we can scrape strings. Using lambda instead of
 #  `django.utils.translation.ugettext_noop` because Django cannot be imported in this file
@@ -764,16 +764,16 @@ class XModuleMixin(XModuleFields, XBlock):
 
         return metadata_field_editor_info
 
-    def anonymous_view(self, _context):
+    def preview_view(self, _context):
         """
-        Default message for blocks that don't implement anonymous_view
+        Default message for blocks that don't implement preview_view
         """
         alert_html = HTML(
             u'<div class="page-banner"><div class="alert alert-warning">'
             u'<span class="icon icon-alert fa fa fa-warning" aria-hidden="true"></span>'
             u'<div class="message-content">{}</div></div></div>'
         )
-        return Fragment(alert_html.format(DEFAULT_ANONYMOUS_MESSAGE))
+        return Fragment(alert_html.format(DEFAULT_PREVIEW_MESSAGE))
 
 
 class ProxyAttribute(object):
@@ -1238,7 +1238,7 @@ class XModuleDescriptor(HTMLSnippet, ResourceTemplates, XModuleMixin):
     get_score = module_attr('get_score')
     handle_ajax = module_attr('handle_ajax')
     student_view = module_attr(STUDENT_VIEW)
-    anonymous_view = module_attr(ANONYMOUS_VIEW)
+    preview_view = module_attr(PREVIEW_VIEW)
     get_child_descriptors = module_attr('get_child_descriptors')
     xmodule_handler = module_attr('xmodule_handler')
 

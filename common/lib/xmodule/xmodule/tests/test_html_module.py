@@ -11,7 +11,7 @@ from xblock.fields import ScopeIds
 from xmodule.html_module import CourseInfoModule, HtmlDescriptor, HtmlModule
 
 from . import get_test_descriptor_system, get_test_system
-from ..x_module import ANONYMOUS_VIEW, STUDENT_VIEW
+from ..x_module import PREVIEW_VIEW, STUDENT_VIEW
 
 
 def instantiate_descriptor(**field_data):
@@ -84,11 +84,11 @@ class HtmlModuleCourseApiTestCase(unittest.TestCase):
 
     @ddt.data(
         STUDENT_VIEW,
-        ANONYMOUS_VIEW,
+        PREVIEW_VIEW,
     )
-    def test_student_anonymous_view(self, view):
+    def test_student_preview_view(self, view):
         """
-        Ensure that student_view and anonymous_view renders correctly.
+        Ensure that student_view and preview_view renders correctly.
         """
         html = '<p>This is a test</p>'
         descriptor = Mock()
