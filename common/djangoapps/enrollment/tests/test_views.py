@@ -1398,7 +1398,7 @@ class CourseEnrollmentsApiListTest(APITestCase, ModuleStoreTestCase):
         self.assertItemsEqual(results, expected_results)
 
     def _create_multiple_users_and_enroll_in_course(self, count, course):
-        for i in range(1, count+1):
+        for i in range(1, count + 1):
             username = 'temp{}'.format(i)
             student = UserFactory(
                 username=username,
@@ -1420,7 +1420,7 @@ class CourseEnrollmentsApiListTest(APITestCase, ModuleStoreTestCase):
             if url is None:
                 break
             page_number += 1
-            query_params =  {'course_id': unicode(course.id), 'page_size': 200} if '?' not in url else {}
+            query_params = {'course_id': unicode(course.id), 'page_size': 200} if '?' not in url else {}
             response = self.client.get(url, query_params)
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -1448,7 +1448,7 @@ class CourseEnrollmentsApiListTest(APITestCase, ModuleStoreTestCase):
                     'user': 'temp{}'.format(x),
                     'created': self.CREATED_DATA.isoformat().replace('+00:00', 'Z')
                 }
-                for x in range(start, end+1)
+                for x in range(start, end + 1)
             ]
             self.assertItemsEqual(expected_response, content['results'])
 
