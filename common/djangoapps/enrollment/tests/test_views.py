@@ -16,7 +16,7 @@ from django.core.urlresolvers import reverse
 from django.test import Client
 from django.test.utils import override_settings
 from freezegun import freeze_time
-from mock import patch
+from mock import patch, PropertyMock
 from nose.plugins.attrib import attr
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -1327,6 +1327,7 @@ class CourseEnrollmentsApiListTest(APITestCase, ModuleStoreTestCase):
                 True
             )
         self.url = reverse('courseenrollmentsapilist')
+        self.page_size = 10
 
     def _login_as_staff(self):
         self.client.login(username=self.staff_user.username, password='edx')
@@ -1395,3 +1396,81 @@ class CourseEnrollmentsApiListTest(APITestCase, ModuleStoreTestCase):
         results = content['results']
 
         self.assertItemsEqual(results, expected_results)
+
+    def _create_multiple_users_and_enroll_in_course(self, count, course):
+        for i in range(1, count+1):
+            username = 'temp{}'.format(i)
+            student = UserFactory(
+                username=username,
+                email='{}@example.com'.format(username),
+                password='edx'
+            )
+            with freeze_time(self.CREATED_DATA):
+                data.create_course_enrollment(
+                    username,
+                    unicode(course.id),
+                    'honor',
+                    True
+                )
+
+    def _assert_page_data(self, course, count, pages):
+        page_number = 0
+        url = self.url
+        while True:
+            if url is None:
+                break
+            page_number += 1
+            query_params =  {'course_id': unicode(course.id), 'page_size': 200} if '?' not in url else {}
+            response = self.client.get(url, query_params)
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            content = json.loads(response.content)
+            self.assertIn('next', content)
+            self.assertIn('previous', content)
+
+            if page_number == 1:
+                self.assertIsNone(content['previous'])
+            else:
+                self.assertIsNotNone(content['previous'])
+
+            if page_number < pages:
+                self.assertIsNotNone(content['next'])
+            elif page_number == pages:
+                self.assertIsNone(content['next'])
+
+            start = (page_number - 1) * self.page_size + 1
+            end = start + self.page_size - 1 if page_number < pages else count
+            expected_response = [
+                {
+                    'course_id': unicode(course.id),
+                    'is_active': True,
+                    'mode': 'honor',
+                    'user': 'temp{}'.format(x),
+                    'created': self.CREATED_DATA.isoformat().replace('+00:00', 'Z')
+                }
+                for x in range(start, end+1)
+            ]
+            self.assertItemsEqual(expected_response, content['results'])
+
+            url = content['next']
+
+        self.assertEqual(page_number, pages)
+
+    @ddt.data(
+        ('a/b/C', 21, 3),
+        ('d/e/F', 10, 1),
+        ('g/h/I', 1, 1),
+    )
+    @ddt.unpack
+    def test_paginated_response(self, course_id, enrollments_count, page_count):
+        org, number, run = course_id.split('/')
+        course = CourseFactory.create(org=org, number=number, run=run, emit_signals=True)
+        self._create_multiple_users_and_enroll_in_course(enrollments_count, course)
+        self._login_as_staff()
+
+        with patch(
+            'enrollment.paginators.CourseEnrollmentsApiListPagination.page_size',
+            new_callable=PropertyMock
+        ) as p:
+            p.return_value = self.page_size
+            self._assert_page_data(course, enrollments_count, page_count)

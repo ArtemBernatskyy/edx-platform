@@ -21,6 +21,7 @@ from course_modes.models import CourseMode
 from enrollment import api
 from enrollment.errors import CourseEnrollmentError, CourseEnrollmentExistsError, CourseModeNotFoundError
 from enrollment.forms import CourseEnrollmentsApiListForm
+from enrollment.paginators import CourseEnrollmentsApiListPagination
 from enrollment.serializers import CourseEnrollmentsApiListSerializer
 from openedx.core.djangoapps.cors_csrf.authentication import SessionAuthenticationCrossDomainCsrf
 from openedx.core.djangoapps.cors_csrf.decorators import ensure_csrf_cookie_cross_domain
@@ -788,6 +789,7 @@ class CourseEnrollmentsApiListView(DeveloperErrorViewMixin, ListAPIView):
     permission_classes = IsAdminUser,
     throttle_classes = EnrollmentUserThrottle,
     serializer_class = CourseEnrollmentsApiListSerializer
+    pagination_class = CourseEnrollmentsApiListPagination
 
     def get_queryset(self):
         """
