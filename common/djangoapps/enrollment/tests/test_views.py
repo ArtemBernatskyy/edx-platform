@@ -1327,7 +1327,6 @@ class CourseEnrollmentsApiListTest(APITestCase, ModuleStoreTestCase):
                 True
             )
         self.url = reverse('courseenrollmentsapilist')
-        self.page_size = 10
 
     def _login_as_staff(self):
         self.client.login(username=self.staff_user.username, password='edx')
