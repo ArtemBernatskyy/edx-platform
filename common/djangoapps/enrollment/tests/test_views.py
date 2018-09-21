@@ -16,7 +16,7 @@ from django.core.urlresolvers import reverse
 from django.test import Client
 from django.test.utils import override_settings
 from freezegun import freeze_time
-from mock import patch, PropertyMock
+from mock import patch
 from nose.plugins.attrib import attr
 from rest_framework import status
 from rest_framework.test import APITestCase
