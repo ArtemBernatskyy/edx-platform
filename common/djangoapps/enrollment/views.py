@@ -13,6 +13,7 @@ from edx_rest_framework_extensions.authentication import JwtAuthentication
 from enrollment import api
 from enrollment.errors import CourseEnrollmentError, CourseEnrollmentExistsError, CourseModeNotFoundError
 from enrollment.forms import CourseEnrollmentsApiListForm
+from enrollment.paginators import CourseEnrollmentsApiListPagination
 from enrollment.serializers import CourseEnrollmentsApiListSerializer
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.keys import CourseKey
@@ -822,12 +823,6 @@ class CourseEnrollmentsApiListView(DeveloperErrorViewMixin, ListAPIView):
 
             The HTTP 200 response has the following values.
 
-            * count: The number of course enrollments matching the request.
-
-            * num_pages: The total number of pages in the result.
-
-            * current_page: The current page number.
-
             * results: A list of the course enrollments matching the request.
 
                 * created: Date and time when the course enrollment was created.
@@ -842,8 +837,6 @@ class CourseEnrollmentsApiListView(DeveloperErrorViewMixin, ListAPIView):
 
             * next: The URL to the next page of results, or null if this is the
               last page.
-
-            * start: The list index of the first item in the response.
 
             * previous: The URL to the next page of results, or null if this
               is the first page.
@@ -867,6 +860,7 @@ class CourseEnrollmentsApiListView(DeveloperErrorViewMixin, ListAPIView):
     permission_classes = permissions.IsAdminUser,
     throttle_classes = EnrollmentUserThrottle,
     serializer_class = CourseEnrollmentsApiListSerializer
+    pagination_class = CourseEnrollmentsApiListPagination
 
     def get_queryset(self):
         """
