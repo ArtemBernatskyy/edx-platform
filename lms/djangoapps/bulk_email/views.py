@@ -22,6 +22,7 @@ from opaque_keys.edx.keys import CourseKey
 
 log = logging.getLogger("lms.bulkemail")
 
+
 @require_GET
 def opt_out_email_updates(request, token, course_id):
     """
