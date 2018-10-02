@@ -5,7 +5,8 @@ Views to support bulk email functionalities like opt-out.
 from __future__ import division
 
 import logging
-import os
+
+from six import text_type
 
 from django.contrib.auth.models import User
 from django.http import Http404, HttpResponse
