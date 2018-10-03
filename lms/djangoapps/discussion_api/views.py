@@ -3,7 +3,7 @@ Discussion API views
 """
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
-from edx_rest_framework_extensions.authentication import JwtAuthentication
+from edx_rest_framework_extensions.authentication import JwtAuthentication, SessionAuthenticationAllowInactiveUser
 from opaque_keys.edx.keys import CourseKey
 from rest_framework import permissions
 from rest_framework import status
@@ -45,10 +45,7 @@ from discussion_api.forms import (
     CourseDiscussionRolesForm)
 from django_comment_client.utils import available_division_schemes
 from django_comment_common.utils import get_course_discussion_settings, set_course_discussion_settings
-from openedx.core.lib.api.authentication import (
-    OAuth2AuthenticationAllowInactiveUser,
-    SessionAuthenticationAllowInactiveUser,
-)
+from openedx.core.lib.api.authentication import OAuth2AuthenticationAllowInactiveUser
 from openedx.core.lib.api.parsers import MergePatchParser
 from openedx.core.lib.api.view_utils import DeveloperErrorViewMixin, view_auth_classes
 from openedx.core.djangoapps.user_api.accounts.permissions import CanRetireUser
