@@ -14,7 +14,6 @@ from edx_django_utils.monitoring import function_trace, set_custom_metric
 
 from courseware.date_summary import verified_upgrade_deadline_link, verified_upgrade_link_is_valid
 from lms.djangoapps.notification_prefs.views import UsernameCipher
-from openedx.core.djangoapps.monitoring_utils import function_trace, set_custom_metric
 from openedx.core.djangoapps.schedules.content_highlights import get_week_highlights
 from openedx.core.djangoapps.schedules.exceptions import CourseUpdateDoesNotExist
 from openedx.core.djangoapps.schedules.models import Schedule, ScheduleExperience

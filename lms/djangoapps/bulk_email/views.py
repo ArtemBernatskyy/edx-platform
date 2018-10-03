@@ -25,7 +25,7 @@ log = logging.getLogger("lms.bulkemail")
 
 
 @require_GET
-def opt_out_email_updates(request, token, course_id):
+def opt_out_email_updates(request, token, course_id):   # pylint: disable=unused-variable
     """
     A view that let users opt out of any email updates.
 
