@@ -14,12 +14,10 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSet
 from six import text_type
 
-from discussion_api.serializers import (
-    DiscussionRolesSerializer,
-    DiscussionRolesListSerializer,
-    DiscussionSettingsSerializer,
-)
+from django_comment_client.utils import available_division_schemes
 from django_comment_common.models import Role
+from django_comment_common.utils import get_course_discussion_settings, set_course_discussion_settings
+
 from instructor.access import update_forum_role
 from lms.lib import comment_client
 from discussion.views import get_divided_discussions
@@ -43,8 +41,11 @@ from discussion_api.forms import (
     CourseDiscussionSettingsForm,
     ThreadListGetForm,
     CourseDiscussionRolesForm)
-from django_comment_client.utils import available_division_schemes
-from django_comment_common.utils import get_course_discussion_settings, set_course_discussion_settings
+from discussion_api.serializers import (
+    DiscussionRolesSerializer,
+    DiscussionRolesListSerializer,
+    DiscussionSettingsSerializer,
+)
 from openedx.core.lib.api.authentication import OAuth2AuthenticationAllowInactiveUser
 from openedx.core.lib.api.parsers import MergePatchParser
 from openedx.core.lib.api.view_utils import DeveloperErrorViewMixin, view_auth_classes
@@ -662,11 +663,15 @@ class CourseDiscussionSettingsAPIView(DeveloperErrorViewMixin, APIView):
             'available_division_schemes': available_division_schemes(course_key)
         })
 
-    def get(self, request, course_id):  # pylint: disable=unused-argument
+    def _get_request_kwargs(self, course_id):
+        return dict(course_id=course_id)
+
+    def get(self, request, course_id):
         """
         Implement a handler for the GET method.
         """
-        form = CourseDiscussionSettingsForm(self.kwargs, request_user=request.user)
+        kwargs = self._get_request_kwargs(course_id)
+        form = CourseDiscussionSettingsForm(kwargs, request_user=request.user)
 
         if not form.is_valid():
             raise ValidationError(form.errors)
@@ -676,14 +681,15 @@ class CourseDiscussionSettingsAPIView(DeveloperErrorViewMixin, APIView):
         discussion_settings = get_course_discussion_settings(course_key)
         return self._get_representation(course, course_key, discussion_settings)
 
-    def patch(self, request, course_id):  # pylint: disable=unused-argument
+    def patch(self, request, course_id):
         """
         Implement a handler for the PATCH method.
         """
         if request.content_type != MergePatchParser.media_type:
             raise UnsupportedMediaType(request.content_type)
 
-        form = CourseDiscussionSettingsForm(self.kwargs, request_user=request.user)
+        kwargs = self._get_request_kwargs(course_id)
+        form = CourseDiscussionSettingsForm(kwargs, request_user=request.user)
         if not form.is_valid():
             raise ValidationError(form.errors)
 
@@ -775,11 +781,15 @@ class CourseDiscussionRolesAPIView(DeveloperErrorViewMixin, APIView):
     )
     permission_classes = (permissions.IsAuthenticated, permissions.IsAdminUser)
 
-    def get(self, request, course_id, rolename):  # pylint: disable=unused-argument
+    def _get_request_kwargs(self, course_id, rolename):
+        return dict(course_id=course_id, rolename=rolename)
+
+    def get(self, request, course_id, rolename):
         """
         Implement a handler for the GET method.
         """
-        form = CourseDiscussionRolesForm(self.kwargs, request_user=request.user)
+        kwargs = self._get_request_kwargs(course_id, rolename)
+        form = CourseDiscussionRolesForm(kwargs, request_user=request.user)
 
         if not form.is_valid():
             raise ValidationError(form.errors)
@@ -793,12 +803,12 @@ class CourseDiscussionRolesAPIView(DeveloperErrorViewMixin, APIView):
         serializer = DiscussionRolesListSerializer(data, context=context)
         return Response(serializer.data)
 
-    def post(self, request, course_id, rolename):  # pylint: disable=unused-argument
+    def post(self, request, course_id, rolename):
         """
         Implement a handler for the POST method.
         """
-        form = CourseDiscussionRolesForm(self.kwargs, request_user=request.user)
-
+        kwargs = self._get_request_kwargs(course_id, rolename)
+        form = CourseDiscussionRolesForm(kwargs, request_user=request.user)
         if not form.is_valid():
             raise ValidationError(form.errors)
 

@@ -16,7 +16,6 @@ from django_comment_client.utils import is_comment_too_deep, get_group_id_for_us
 from django_comment_common.models import (
     FORUM_ROLE_ADMINISTRATOR,
     FORUM_ROLE_COMMUNITY_TA,
-    FORUM_ROLE_GROUP_MODERATOR,
     FORUM_ROLE_MODERATOR,
     Role,
 )
@@ -470,11 +469,11 @@ class DiscussionSettingsSerializer(serializers.Serializer):
         self.discussion_settings = kwargs.pop('discussion_settings')
         super(DiscussionSettingsSerializer, self).__init__(*args, **kwargs)
 
-    def validate(self, data):
+    def validate(self, attrs):
         """
         Validate the fields in combination.
         """
-        if not any(field in data for field in self.fields):
+        if not any(field in attrs for field in self.fields):
             raise ValidationError('Bad request')
 
         settings_to_change = {}
@@ -482,16 +481,31 @@ class DiscussionSettingsSerializer(serializers.Serializer):
             self.course, self.discussion_settings
         )
 
-        if any(item in data for item in ('divided_course_wide_discussions', 'divided_inline_discussions')):
-            divided_course_wide_discussions = data.get('divided_course_wide_discussions', divided_course_wide_discussions)
-            divided_inline_discussions = data.get('divided_inline_discussions', divided_inline_discussions)
+        if any(item in attrs for item in ('divided_course_wide_discussions', 'divided_inline_discussions')):
+            divided_course_wide_discussions = attrs.get(
+                'divided_course_wide_discussions',
+                divided_course_wide_discussions
+            )
+            divided_inline_discussions = attrs.get('divided_inline_discussions', divided_inline_discussions)
             settings_to_change['divided_discussions'] = divided_course_wide_discussions + divided_inline_discussions
 
         for item in ('always_divide_inline_discussions', 'division_scheme'):
-            if item in data:
-                settings_to_change[item] = data[item]
-        data['settings_to_change'] = settings_to_change
-        return data
+            if item in attrs:
+                settings_to_change[item] = attrs[item]
+        attrs['settings_to_change'] = settings_to_change
+        return attrs
+
+    def create(self, validated_data):
+        """
+        Overriden create abstract method
+        """
+        pass
+
+    def update(self, instance, validated_data):
+        """
+        Overriden update abstract method
+        """
+        pass
 
 
 class DiscussionRolesSerializer(serializers.Serializer):
@@ -506,6 +520,10 @@ class DiscussionRolesSerializer(serializers.Serializer):
     action = serializers.ChoiceField(ACTION_CHOICES)
     user_id = serializers.CharField()
 
+    def __init__(self, *args, **kwargs):
+        super(DiscussionRolesSerializer, self).__init__(*args, **kwargs)
+        self.user = None
+
     def validate_user_id(self, user_id):
         try:
             self.user = get_user_by_username_or_email(user_id)
@@ -513,13 +531,25 @@ class DiscussionRolesSerializer(serializers.Serializer):
         except DjangoUser.DoesNotExist:
             raise ValidationError("'{}' is not a valid student identifier".format(user_id))
 
-    def validate(self, data):
+    def validate(self, attrs):
         """Validate the data at an object level."""
 
         # Store the user object to avoid fetching it again.
         if hasattr(self, 'user'):
-            data['user'] = self.user
-        return data
+            attrs['user'] = self.user
+        return attrs
+
+    def create(self, validated_data):
+        """
+        Overriden create abstract method
+        """
+        pass
+
+    def update(self, instance, validated_data):
+        """
+        Overriden update abstract method
+        """
+        pass
 
 
 class DiscussionRolesMemberSerializer(serializers.Serializer):
@@ -538,10 +568,21 @@ class DiscussionRolesMemberSerializer(serializers.Serializer):
 
     def get_group_name(self, instance):
         """Return the group name of the user."""
-        course_id = self.context['course_id']
         group_id = get_group_id_for_user(instance, self.course_discussion_settings)
         group_name = get_group_name(group_id, self.course_discussion_settings)
         return group_name
+
+    def create(self, validated_data):
+        """
+        Overriden create abstract method
+        """
+        pass
+
+    def update(self, instance, validated_data):
+        """
+        Overriden update abstract method
+        """
+        pass
 
 
 class DiscussionRolesListSerializer(serializers.Serializer):
@@ -554,10 +595,25 @@ class DiscussionRolesListSerializer(serializers.Serializer):
 
     def get_results(self, obj):
         """Return the nested serializer data representing a list of member users."""
-        context = {'course_id': obj['course_id'], 'course_discussion_settings': self.context['course_discussion_settings']}
+        context = {
+            'course_id': obj['course_id'],
+            'course_discussion_settings': self.context['course_discussion_settings']
+        }
         serializer = DiscussionRolesMemberSerializer(obj['users'], context=context, many=True)
         return serializer.data
 
-    def get_division_scheme(self, obj):
+    def get_division_scheme(self, obj):  # pylint: disable=unused-argument
         """Return the division scheme for the course."""
         return self.context['course_discussion_settings'].division_scheme
+
+    def create(self, validated_data):
+        """
+        Overriden create abstract method
+        """
+        pass
+
+    def update(self, instance, validated_data):
+        """
+        Overriden update abstract method
+        """
+        pass

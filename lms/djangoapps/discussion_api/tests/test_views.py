@@ -2115,8 +2115,8 @@ class CourseDiscussionRolesAPIViewTest(APITestCase, UrlResetMixin, ModuleStoreTe
         self.client.logout()
         response = self.client.get(self.path(), **oauth_headers)
         self.assertEqual(response.status_code, 200)
-
-        response = self.client.post(self.path(), {'user_id': 'staff', 'action': 'allow'}, format='json', **oauth_headers)
+        body = {'user_id': 'staff', 'action': 'allow'}
+        response = self.client.post(self.path(), body, format='json', **oauth_headers)
         self.assertEqual(response.status_code, 200)
 
     @ddt.data(
@@ -2126,7 +2126,7 @@ class CourseDiscussionRolesAPIViewTest(APITestCase, UrlResetMixin, ModuleStoreTe
     @ddt.unpack
     def test_staff_permission_required(self, username, is_staff, expected_status):
         """Test and verify that only users with staff permission can access this endpoint."""
-        user = UserFactory(username=username, password='edx', is_staff=is_staff)
+        UserFactory(username=username, password='edx', is_staff=is_staff)
         self.client.login(username=username, password='edx')
         response = self.client.get(self.path())
         self.assertEqual(response.status_code, expected_status)
