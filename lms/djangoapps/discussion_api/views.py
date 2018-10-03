@@ -22,7 +22,7 @@ from discussion_api.serializers import (
 from django_comment_common.models import Role
 from instructor.access import update_forum_role
 from lms.lib import comment_client
-from discussion.api import get_divided_discussions
+from discussion.views import get_divided_discussions
 from discussion_api.api import (
     create_comment,
     create_thread,
