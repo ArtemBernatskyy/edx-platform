@@ -126,7 +126,7 @@ class VerticalBlockTestCase(BaseVerticalBlockTest):
     )
     def test_render_student_preview_view(self, context, view):
         """
-        Test the rendering of the student and anonymous view.
+        Test the rendering of the student and preview view.
         """
         self.module_system._services['bookmarks'] = Mock()
         if view == STUDENT_VIEW:

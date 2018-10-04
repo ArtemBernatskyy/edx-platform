@@ -37,28 +37,27 @@ class CourseOutlineFragmentView(EdxFragmentView):
 
         course_id = kwargs['course_id']
         course_key = CourseKey.from_string(course_id)
-        anonymous = request.user.is_anonymous()
+        user_is_enrolled = kwargs.get('user_is_enrolled', True)
         course_overview = get_course_overview_with_access(
-            request.user, 'load', course_key, check_if_enrolled=not anonymous
+            request.user, 'load', course_key, check_if_enrolled=user_is_enrolled
         )
         course = modulestore().get_course(course_key)
 
-        course_block_tree = get_course_outline_block_tree(request, course_id)
+        course_block_tree = get_course_outline_block_tree(
+            request, course_id, request.user if user_is_enrolled else None
+        )
         if not course_block_tree:
             return None
-
-        enable_links = request.user.is_authenticated or (
-            kwargs['enable_anonymous_access'] and course.course_visibility == 'public')
 
         context = {
             'csrf': csrf(request)['csrf_token'],
             'course': course_overview,
             'due_date_display_format': course.due_date_display_format,
             'blocks': course_block_tree,
-            'enable_links': enable_links
+            'enable_links': user_is_enrolled or course.course_visibility == 'public',
         }
 
-        resume_block = None if anonymous else get_resume_block(course_block_tree)
+        resume_block = get_resume_block(course_block_tree) if user_is_enrolled else None
 
         if not resume_block:
             self.mark_first_unit_to_resume(course_block_tree)

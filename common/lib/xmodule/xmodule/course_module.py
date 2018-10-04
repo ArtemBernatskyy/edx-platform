@@ -819,9 +819,9 @@ class CourseFields(object):
     )
 
     course_visibility = String(
-        display_name=_("Course Visibility For Unauthenticated Students"),
+        display_name=_("Course Visibility For Unenrolled Learners"),
         help=_(
-            "Defines the access permissions for unauthenticated users. This can be set to one of three values: "
+            "Defines the access permissions for unenrolled learners. This can be set to one of three values: "
             "'private' (default visibility, only allowed for enrolled students), 'preview' (allow access to course "
             "outline) and 'public' (allow full-access to course material)."
         ),

@@ -29,8 +29,9 @@ from openedx.features.course_experience.course_tools import CourseToolsPluginMan
 from student.models import CourseEnrollment
 from util.views import ensure_valid_course_key
 
-from .. import LATEST_UPDATE_FLAG, SHOW_UPGRADE_MSG_ON_COURSE_HOME, USE_BOOTSTRAP_FLAG, \
-    COURSE_ENABLE_ANONYMOUS_ACCESS_FLAG
+from .. import (
+    LATEST_UPDATE_FLAG, SHOW_UPGRADE_MSG_ON_COURSE_HOME, USE_BOOTSTRAP_FLAG, COURSE_ENABLE_UNENROLLED_ACCESS_FLAG
+)
 from ..utils import get_course_outline_block_tree, get_resume_block
 from .course_dates import CourseDatesFragmentView
 from .course_home_messages import CourseHomeMessageFragmentView
@@ -84,7 +85,7 @@ class CourseHomeFragmentView(EdxFragmentView):
                 otherwise the URL of the course root.
 
         """
-        course_outline_root_block = get_course_outline_block_tree(request, course_id)
+        course_outline_root_block = get_course_outline_block_tree(request, course_id, request.user)
         resume_block = get_resume_block(course_outline_root_block) if course_outline_root_block else None
         has_visited_course = bool(resume_block)
         if resume_block:
@@ -122,7 +123,7 @@ class CourseHomeFragmentView(EdxFragmentView):
             'is_staff': has_access(request.user, 'staff', course_key),
         }
 
-        allow_anonymous = COURSE_ENABLE_ANONYMOUS_ACCESS_FLAG.is_enabled(course_key)
+        allow_anonymous = COURSE_ENABLE_UNENROLLED_ACCESS_FLAG.is_enabled(course_key)
         allow_public = allow_anonymous and course.course_visibility == 'public'
         allow_preview = allow_anonymous and course.course_visibility == 'preview'
 
@@ -151,7 +152,7 @@ class CourseHomeFragmentView(EdxFragmentView):
             handouts_html = self._get_course_handouts(request, course)
         elif allow_preview or allow_public:
             outline_fragment = CourseOutlineFragmentView().render_to_fragment(
-                request, course_id=course_id, enable_anonymous_access=True, **kwargs
+                request, course_id=course_id, user_is_enrolled=False, **kwargs
             )
             course_sock_fragment = CourseSockFragmentView().render_to_fragment(request, course=course, **kwargs)
         else:

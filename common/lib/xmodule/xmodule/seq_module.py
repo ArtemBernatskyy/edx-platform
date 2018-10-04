@@ -251,7 +251,7 @@ class SequenceModule(SequenceFields, ProctoringFields, XModule):
 
     def preview_view(self, context):
         """
-        Renders the anonymous view of the block in the LMS.
+        Renders the preview view of the block in the LMS.
         """
         return self._student_view(context or {}, None, PREVIEW_VIEW)
 

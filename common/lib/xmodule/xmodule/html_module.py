@@ -82,7 +82,7 @@ class HtmlBlock(object):
     @XBlock.supports("multi_device")
     def preview_view(self, context):
         """
-        Returns a fragment that contains the html for the anonymous view
+        Returns a fragment that contains the html for the preview view
         """
         return self.student_view(context)
 

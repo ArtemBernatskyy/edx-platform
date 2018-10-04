@@ -11,7 +11,7 @@ from xmodule.modulestore.django import modulestore
 
 
 @request_cached()
-def get_course_outline_block_tree(request, course_id):
+def get_course_outline_block_tree(request, course_id, user):
     """
     Returns the root block of the course outline, with children as blocks.
     """
@@ -156,8 +156,7 @@ def get_course_outline_block_tree(request, course_id):
     course_outline_root_block = all_blocks['blocks'].get(all_blocks['root'], None)
     if course_outline_root_block:
         populate_children(course_outline_root_block, all_blocks['blocks'])
-
-        if request.user.is_authenticated:
+        if user:
             set_last_accessed_default(course_outline_root_block)
             mark_blocks_completed(
                 block=course_outline_root_block,

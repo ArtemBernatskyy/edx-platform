@@ -36,8 +36,9 @@ from openedx.core.djangoapps.user_api.preferences.api import get_user_preference
 from openedx.core.djangoapps.util.user_messages import PageLevelMessages
 from openedx.core.djangoapps.waffle_utils import WaffleSwitchNamespace
 from openedx.core.djangolib.markup import HTML, Text
-from openedx.features.course_experience import COURSE_OUTLINE_PAGE_FLAG, default_course_url_name, \
-    COURSE_ENABLE_ANONYMOUS_ACCESS_FLAG
+from openedx.features.course_experience import (
+    COURSE_OUTLINE_PAGE_FLAG, default_course_url_name, COURSE_ENABLE_UNENROLLED_ACCESS_FLAG
+)
 from openedx.features.course_experience.views.course_sock import CourseSockFragmentView
 from openedx.features.enterprise_support.api import data_sharing_consent_required
 from shoppingcart.models import CourseRegistrationCode
@@ -71,8 +72,8 @@ class CoursewareIndex(View):
     """
 
     @cached_property
-    def enable_anonymous_courseware_access(self):
-        return COURSE_ENABLE_ANONYMOUS_ACCESS_FLAG.is_enabled(self.course_key)
+    def enable_unenrolled_access(self):
+        return COURSE_ENABLE_UNENROLLED_ACCESS_FLAG.is_enabled(self.course_key)
 
     @method_decorator(ensure_csrf_cookie)
     @method_decorator(cache_control(no_cache=True, no_store=True, must_revalidate=True))
@@ -99,7 +100,7 @@ class CoursewareIndex(View):
         """
         self.course_key = CourseKey.from_string(course_id)
 
-        if not (request.user.is_authenticated or self.enable_anonymous_courseware_access):
+        if not (request.user.is_authenticated or self.enable_unenrolled_access):
             return redirect_to_login(request.get_full_path())
 
         self.original_chapter_url_name = chapter
@@ -118,7 +119,7 @@ class CoursewareIndex(View):
                 self.course = get_course_with_access(
                     request.user, 'load', self.course_key,
                     depth=CONTENT_DEPTH,
-                    check_if_enrolled=not self.enable_anonymous_courseware_access,
+                    check_if_enrolled=not self.enable_unenrolled_access,
                 )
                 is_enrolled = CourseEnrollment.is_enrolled(request.user, self.course_key)
                 if is_enrolled:
@@ -446,7 +447,6 @@ class CoursewareIndex(View):
                 table_of_contents['next_of_active_section'],
             )
 
-            # block content
             courseware_context['fragment'] = self.section.render(self.view, section_context)
 
             if self.section.position and self.section.has_children:

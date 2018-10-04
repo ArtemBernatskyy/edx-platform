@@ -63,8 +63,9 @@ from openedx.core.djangolib.testing.utils import get_mock_request
 from openedx.core.lib.gating import api as gating_api
 from openedx.core.lib.tests import attr
 from openedx.core.lib.url_utils import quote_slashes
-from openedx.features.course_experience import COURSE_OUTLINE_PAGE_FLAG, UNIFIED_COURSE_TAB_FLAG, \
-    COURSE_ENABLE_ANONYMOUS_ACCESS_FLAG
+from openedx.features.course_experience import (
+    COURSE_OUTLINE_PAGE_FLAG, UNIFIED_COURSE_TAB_FLAG, COURSE_ENABLE_UNENROLLED_ACCESS_FLAG
+)
 from openedx.features.enterprise_support.tests.mixins.enterprise import EnterpriseTestConsentRequired
 from student.models import CourseEnrollment
 from student.tests.factories import TEST_PASSWORD, AdminFactory, CourseEnrollmentFactory, UserFactory
@@ -2343,7 +2344,7 @@ class TestIndexView(ModuleStoreTestCase):
         [True, 'public', 200],
     )
     @ddt.unpack
-    def test_anonymous_access(self, waffle_override, course_visibility, expected_status):
+    def test_unenrolled_access(self, waffle_override, course_visibility, expected_status):
         course = CourseFactory(course_visibility=course_visibility)
         with self.store.bulk_operations(course.id):
             chapter = ItemFactory(parent=course, category='chapter')
@@ -2361,7 +2362,7 @@ class TestIndexView(ModuleStoreTestCase):
             }
         )
 
-        with override_waffle_flag(COURSE_ENABLE_ANONYMOUS_ACCESS_FLAG, active=waffle_override):
+        with override_waffle_flag(COURSE_ENABLE_UNENROLLED_ACCESS_FLAG, active=waffle_override):
             response = self.client.get(url, follow=False)
             assert response.status_code == expected_status
             if expected_status == 200:  # Public access is available
@@ -2372,13 +2373,17 @@ class TestIndexView(ModuleStoreTestCase):
                 self.assertIn('xblock-preview_view-html', response.content)
                 self.assertIn('xblock-preview_view-video', response.content)
 
-        user = UserFactory()
-        CourseEnrollmentFactory(user=user, course_id=course.id)
-        self.assertTrue(self.client.login(username=user.username, password='test'))
-        response = self.client.get(url, follow=False)
-        assert response.status_code == 200
-        self.assertIn('data-save-position="true"', response.content)
-        self.assertIn('data-show-completion="true"', response.content)
+            user = UserFactory()
+            self.assertTrue(self.client.login(username=user.username, password='test'))
+            response = self.client.get(url, follow=False)
+            # Logged in but unenrolled learners get the same behaviour as anonymous learners.
+            assert response.status_code == expected_status
+
+            CourseEnrollmentFactory(user=user, course_id=course.id)
+            response = self.client.get(url, follow=False)
+            assert response.status_code == 200
+            self.assertIn('data-save-position="true"', response.content)
+            self.assertIn('data-show-completion="true"', response.content)
 
 
 @attr(shard=5)

@@ -9,7 +9,7 @@ from xblock.fields import Scope
 from xblock_django.models import XBlockStudioConfigurationFlag
 from xmodule.modulestore.django import modulestore
 
-from openedx.features.course_experience import COURSE_ENABLE_ANONYMOUS_ACCESS_FLAG
+from openedx.features.course_experience import COURSE_ENABLE_UNENROLLED_ACCESS_FLAG
 
 
 class CourseMetadata(object):
@@ -119,9 +119,9 @@ class CourseMetadata(object):
         if not XBlockStudioConfigurationFlag.is_enabled():
             filtered_list.append('allow_unsupported_xblocks')
 
-        # Do not show "Course Visibility For Unauthenticated Students" in Studio Advanced Settings
+        # Do not show "Course Visibility For Unenrolled Learners" in Studio Advanced Settings
         # if the enable_anonymous_access flag is not enabled
-        if not COURSE_ENABLE_ANONYMOUS_ACCESS_FLAG.is_enabled(course_key=course_key):
+        if not COURSE_ENABLE_UNENROLLED_ACCESS_FLAG.is_enabled(course_key=course_key):
             filtered_list.append('course_visibility')
         return filtered_list
 
