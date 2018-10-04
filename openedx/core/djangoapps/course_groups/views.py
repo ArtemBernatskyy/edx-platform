@@ -17,7 +17,6 @@ from django.views.decorators.http import require_http_methods, require_POST
 from edx_rest_framework_extensions.authentication import JwtAuthentication, SessionAuthentication
 from edx_rest_framework_extensions.paginators import NamespacedPageNumberPagination
 from opaque_keys.edx.keys import CourseKey
-from opaque_keys.edx.locations import SlashSeparatedCourseKey
 from rest_framework import status, permissions
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
