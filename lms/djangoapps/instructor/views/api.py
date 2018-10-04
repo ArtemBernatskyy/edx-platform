@@ -1411,7 +1411,11 @@ class CohortCSV(DeveloperErrorViewMixin, APIView):
     **Response Values**
         * Empty as this is executed asynchronously.
     """
-    authentication_classes = (JwtAuthentication, OAuth2AuthenticationAllowInactiveUser, SessionAuthenticationAllowInactiveUser,)
+    authentication_classes = (
+        JwtAuthentication,
+        OAuth2AuthenticationAllowInactiveUser,
+        SessionAuthenticationAllowInactiveUser,
+    )
     permission_classes = (permissions.IsAuthenticated, permissions.IsAdminUser)
 
     def post(self, request, course_key_string):
