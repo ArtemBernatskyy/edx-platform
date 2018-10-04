@@ -119,7 +119,7 @@ class CourseHomeFragmentView(EdxFragmentView):
         enrollment = CourseEnrollment.get_enrollment(request.user, course_key)
         user_access = {
             'is_anonymous': request.user.is_anonymous,
-            'is_enrolled': enrollment is not None,
+            'is_enrolled': enrollment and enrollment.is_active,
             'is_staff': has_access(request.user, 'staff', course_key),
         }
 

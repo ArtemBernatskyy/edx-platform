@@ -119,15 +119,15 @@ class CoursewareIndex(View):
                 self.course = get_course_with_access(
                     request.user, 'load', self.course_key,
                     depth=CONTENT_DEPTH,
-                    check_if_enrolled=not self.enable_unenrolled_access,
+                    check_if_enrolled=False,
                 )
                 is_enrolled = CourseEnrollment.is_enrolled(request.user, self.course_key)
                 if is_enrolled:
                     self.view = STUDENT_VIEW
-                elif self.course.course_visibility == 'public':
+                elif self.enable_unenrolled_access and self.course.course_visibility == 'public':
                     self.view = PREVIEW_VIEW
                 else:
-                    return redirect_to_login(request.get_full_path())
+                    raise CourseAccessRedirect(reverse('about_course', args=[unicode(self.course_key)]))
 
                 self.is_staff = has_access(request.user, 'staff', self.course)
                 self._setup_masquerade_for_effective_user()
