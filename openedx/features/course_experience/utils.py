@@ -11,10 +11,12 @@ from xmodule.modulestore.django import modulestore
 
 
 @request_cached()
-def get_course_outline_block_tree(request, course_id, user):
+def get_course_outline_block_tree(request, course_id, user=None):
     """
     Returns the root block of the course outline, with children as blocks.
     """
+
+    assert user is None or user.is_authenticated
 
     def populate_children(block, all_blocks):
         """

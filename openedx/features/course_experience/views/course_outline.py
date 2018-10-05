@@ -18,6 +18,7 @@ from openedx.core.djangoapps.plugin_api.views import EdxFragmentView
 from student.models import CourseEnrollment
 
 from util.milestones_helpers import get_course_content_milestones
+from xmodule.course_module import COURSE_VISIBILITY_PUBLIC
 from xmodule.modulestore.django import modulestore
 from ..utils import get_course_outline_block_tree, get_resume_block
 
@@ -30,14 +31,11 @@ class CourseOutlineFragmentView(EdxFragmentView):
     Course outline fragment to be shown in the unified course view.
     """
 
-    def render_to_fragment(self, request, **kwargs):
+    def render_to_fragment(self, request, course_id, user_is_enrolled=True, **kwargs):  # pylint: disable=arguments-differ
         """
         Renders the course outline as a fragment.
         """
-
-        course_id = kwargs['course_id']
         course_key = CourseKey.from_string(course_id)
-        user_is_enrolled = kwargs.get('user_is_enrolled', True)
         course_overview = get_course_overview_with_access(
             request.user, 'load', course_key, check_if_enrolled=user_is_enrolled
         )
@@ -54,7 +52,7 @@ class CourseOutlineFragmentView(EdxFragmentView):
             'course': course_overview,
             'due_date_display_format': course.due_date_display_format,
             'blocks': course_block_tree,
-            'enable_links': user_is_enrolled or course.course_visibility == 'public',
+            'enable_links': user_is_enrolled or course.course_visibility == COURSE_VISIBILITY_PUBLIC,
         }
 
         resume_block = get_resume_block(course_block_tree) if user_is_enrolled else None

@@ -28,6 +28,7 @@ from openedx.core.djangoapps.util.maintenance_banner import add_maintenance_bann
 from openedx.features.course_experience.course_tools import CourseToolsPluginManager
 from student.models import CourseEnrollment
 from util.views import ensure_valid_course_key
+from xmodule.course_module import COURSE_VISIBILITY_PREVIEW, COURSE_VISIBILITY_PUBLIC
 
 from .. import (
     LATEST_UPDATE_FLAG, SHOW_UPGRADE_MSG_ON_COURSE_HOME, USE_BOOTSTRAP_FLAG, COURSE_ENABLE_UNENROLLED_ACCESS_FLAG
@@ -124,8 +125,8 @@ class CourseHomeFragmentView(EdxFragmentView):
         }
 
         allow_anonymous = COURSE_ENABLE_UNENROLLED_ACCESS_FLAG.is_enabled(course_key)
-        allow_public = allow_anonymous and course.course_visibility == 'public'
-        allow_preview = allow_anonymous and course.course_visibility == 'preview'
+        allow_public = allow_anonymous and course.course_visibility == COURSE_VISIBILITY_PUBLIC
+        allow_preview = allow_anonymous and course.course_visibility == COURSE_VISIBILITY_PREVIEW
 
         # Set all the fragments
         outline_fragment = None

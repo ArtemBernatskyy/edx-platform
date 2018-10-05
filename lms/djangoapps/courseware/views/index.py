@@ -45,6 +45,7 @@ from shoppingcart.models import CourseRegistrationCode
 from student.views import is_course_blocked
 from util.views import ensure_valid_course_key
 from xmodule.modulestore.django import modulestore
+from xmodule.course_module import COURSE_VISIBILITY_PUBLIC
 from xmodule.x_module import PREVIEW_VIEW, STUDENT_VIEW
 from .views import CourseTabView
 from ..access import has_access
@@ -124,7 +125,7 @@ class CoursewareIndex(View):
                 is_enrolled = CourseEnrollment.is_enrolled(request.user, self.course_key)
                 if is_enrolled:
                     self.view = STUDENT_VIEW
-                elif self.enable_unenrolled_access and self.course.course_visibility == 'public':
+                elif self.enable_unenrolled_access and self.course.course_visibility == COURSE_VISIBILITY_PUBLIC:
                     self.view = PREVIEW_VIEW
                 else:
                     raise CourseAccessRedirect(reverse('about_course', args=[unicode(self.course_key)]))
